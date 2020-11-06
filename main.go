@@ -49,7 +49,7 @@ type Response struct {
 	}
 }
 
-func fetch(url string, token string, page int) []byte {
+func fetch(url string, token string, from string, to string, page int) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
@@ -60,8 +60,8 @@ func fetch(url string, token string, page int) []byte {
 	}
 
 	q := req.URL.Query()
-	q.Add("from_time", "2020-11-05T10:00:00.000-06:00")
-	q.Add("to_time", "2020-11-05T11:19:19.000-06:00")
+	q.Add("from_time", from)
+	q.Add("to_time", to)
 	q.Add("page", strconv.Itoa(page))
 
 	req.URL.RawQuery = q.Encode()
@@ -89,8 +89,10 @@ func main() {
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
 	token := os.Getenv("QLIQ_API_TOKEN")
-	page := 1
-	data := fetch(url, token, page)
+	fromTime := "2020-11-05T10:00:00.000-06:00"
+	toTime := "2020-11-05T11:19:19.000-06:00"
+	page := 3
+	data := fetch(url, token, fromTime, toTime, page)
 
 	// var result map[string]interface{}
 
