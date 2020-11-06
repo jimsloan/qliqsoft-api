@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -48,10 +49,7 @@ type Response struct {
 	}
 }
 
-func main() {
-
-	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	token := os.Getenv("QLIQ_API_TOKEN")
+func fetch(url string, token string, page int) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
@@ -64,7 +62,7 @@ func main() {
 	q := req.URL.Query()
 	q.Add("from_time", "2020-11-05T10:00:00.000-06:00")
 	q.Add("to_time", "2020-11-05T11:19:19.000-06:00")
-	q.Add("page", "1")
+	q.Add("page", strconv.Itoa(page))
 
 	req.URL.RawQuery = q.Encode()
 
@@ -83,18 +81,32 @@ func main() {
 		log.Fatal(readErr)
 	}
 
+	return body
+
+}
+
+func main() {
+
+	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
+	token := os.Getenv("QLIQ_API_TOKEN")
+	page := 1
+	data := fetch(url, token, page)
+
 	// var result map[string]interface{}
 
 	var result Response
-	jsonErr := json.Unmarshal([]byte(body), &result)
+	jsonErr := json.Unmarshal([]byte(data), &result)
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
 
 	// fmt.Printf("%s\n", string(body))
 	// fmt.Printf("%+v\n", result)
+
 	fmt.Printf("Page: %d\n", result.Meta.Page)
 	fmt.Printf("Page Count: %d\n", result.Meta.Total_pages)
+
+	// loop over the visit records
 	for i, s := range result.Virtual_visits.Data {
 		fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
 	}
