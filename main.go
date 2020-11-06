@@ -9,25 +9,41 @@ import (
 	"time"
 )
 
-type Record struct {
-	Id         string `json:"id"`
-	Type       string `json:"type"`
-	Attributes map[string]interface{}
+type Attributes struct {
+	CallType      string
+	Owner         string
+	Widget        string
+	SessionID     string
+	Type          string
+	Title         string
+	Status        string
+	StartAt       string
+	JoinedAt      string
+	LeftAt        string
+	Duration      float64
+	DeviceBrowser string
+	FailureReason string
 }
 
-type Visits struct {
-	virtual_visits struct {
-		Data []Record
+type Data struct {
+	Id         string
+	Type       string
+	Attributes Attributes
+}
+
+type Response struct {
+	Virtual_visits struct {
+		Data []Data
 	}
 	Meta struct {
 		Filters struct {
-			From string `json:"from_time"`
-			To   string `json:"to_time"`
+			From_time string
+			To_time   string
 		}
-		Page      int64 `json:"page"`
-		Items     int64 `json:"items"`
-		Count     int64 `json:"count"`
-		PageCount int64 `json:"total_pages"`
+		Page        int64
+		Items       int64
+		Count       int64
+		Total_pages int64
 	}
 }
 
@@ -44,13 +60,13 @@ func main() {
 	}
 
 	q := req.URL.Query()
-	q.Add("from_time", "2020-11-05T11:19:19.000-06:00")
+	q.Add("from_time", "2020-11-05T10:00:00.000-06:00")
 	q.Add("to_time", "2020-11-05T11:19:19.000-06:00")
 	q.Add("page", "1")
 
 	req.URL.RawQuery = q.Encode()
 
-	req.Header.Set("Authorization", "{insert toked here}")
+	req.Header.Set("Authorization", "{token}")
 	res, getErr := client.Do(req)
 	if getErr != nil {
 		log.Fatal(getErr)
@@ -65,15 +81,19 @@ func main() {
 		log.Fatal(readErr)
 	}
 
-	var result Visits
-	//var result map[string]interface{}
+	// var result map[string]interface{}
+
+	var result Response
 	jsonErr := json.Unmarshal([]byte(body), &result)
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
 
-	fmt.Printf("%+v\n", result)
-	// fmt.Printf("Page: %d\n", result.Meta.Page)
-	// fmt.Printf("Page Count: %d\n", result.Meta.PageCount)
-
+	// fmt.Printf("%s\n", string(body))
+	// fmt.Printf("%+v\n", result)
+	fmt.Printf("Page: %d\n", result.Meta.Page)
+	fmt.Printf("Page Count: %d\n", result.Meta.Total_pages)
+	for i, s := range result.Virtual_visits.Data {
+		fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
+	}
 }
