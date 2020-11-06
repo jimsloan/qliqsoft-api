@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -50,6 +51,7 @@ type Response struct {
 func main() {
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
+	token := os.Getenv("QLIQ_API_TOKEN")
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
@@ -66,7 +68,7 @@ func main() {
 
 	req.URL.RawQuery = q.Encode()
 
-	req.Header.Set("Authorization", "{token}")
+	req.Header.Set("Authorization", token)
 	res, getErr := client.Do(req)
 	if getErr != nil {
 		log.Fatal(getErr)
