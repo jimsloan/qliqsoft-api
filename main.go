@@ -42,10 +42,10 @@ type Response struct {
 			From_time string
 			To_time   string
 		}
-		Page        int64
-		Items       int64
-		Count       int64
-		Total_pages int64
+		Page        int
+		Items       int
+		Count       int
+		Total_pages int
 	}
 }
 
@@ -95,26 +95,42 @@ func main() {
 	}
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	fromTime := "2020-11-05T10:00:00.000-06:00"
-	toTime := "2020-11-05T11:19:19.000-06:00"
-	page := 1
-	data := fetchAPI(url, token, fromTime, toTime, page)
+	fromTime := "2020-11-05T00:00:00.000-06:00"
+	toTime := "2020-11-05T06:00:00.000-06:00"
 
 	// var result map[string]interface{}
 	var result Response
 
-	jsonErr := json.Unmarshal([]byte(data), &result)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
-	}
+	// call fetchAPI() until there are no more pages
+	totalPages := 1
 
-	// loop over the visit records
-	for i, s := range result.Virtual_visits.Data {
-		fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
-	}
+	for thisPage := 0; thisPage < totalPages; thisPage++ {
+		data := fetchAPI(url, token, fromTime, toTime, thisPage+1)
 
-	// fmt.Printf("%s\n", string(body))
-	// fmt.Printf("%+v\n", result)
-	fmt.Printf("Page: %d\n", result.Meta.Page)
-	fmt.Printf("Page Count: %d\n", result.Meta.Total_pages)
+		jsonErr := json.Unmarshal([]byte(data), &result)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+
+		totalPages = result.Meta.Total_pages
+
+		// loop over the visit records
+		for i, s := range result.Virtual_visits.Data {
+			fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
+		}
+
+		if thisPage+1 != result.Meta.Page {
+			fmt.Printf("Pages out of sync.\n")
+			break
+		}
+
+		if result.Meta.Count > 0 {
+			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.Total_pages, result.Meta.Items, result.Meta.Count)
+			fmt.Printf("------\n")
+		} else {
+			fmt.Printf("No records returned.\n")
+			break
+		}
+
+	}
 }
