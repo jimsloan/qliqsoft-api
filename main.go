@@ -49,7 +49,7 @@ type Response struct {
 	}
 }
 
-func fetch(url string, token string, from string, to string, page int) []byte {
+func fetchAPI(url string, token string, from string, to string, page int) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
@@ -82,34 +82,39 @@ func fetch(url string, token string, from string, to string, page int) []byte {
 	}
 
 	return body
-
 }
 
 func main() {
 
+	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
+	if !ok {
+		log.Fatal("QLIQ_API_TOKEN not set\n")
+	}
+	if len(token) == 0 {
+		log.Fatal("QLIQ_API_TOKEN empty\n")
+	}
+
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	token := os.Getenv("QLIQ_API_TOKEN")
 	fromTime := "2020-11-05T10:00:00.000-06:00"
 	toTime := "2020-11-05T11:19:19.000-06:00"
-	page := 3
-	data := fetch(url, token, fromTime, toTime, page)
+	page := 1
+	data := fetchAPI(url, token, fromTime, toTime, page)
 
 	// var result map[string]interface{}
-
 	var result Response
+
 	jsonErr := json.Unmarshal([]byte(data), &result)
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
 
-	// fmt.Printf("%s\n", string(body))
-	// fmt.Printf("%+v\n", result)
-
-	fmt.Printf("Page: %d\n", result.Meta.Page)
-	fmt.Printf("Page Count: %d\n", result.Meta.Total_pages)
-
 	// loop over the visit records
 	for i, s := range result.Virtual_visits.Data {
 		fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
 	}
+
+	// fmt.Printf("%s\n", string(body))
+	// fmt.Printf("%+v\n", result)
+	fmt.Printf("Page: %d\n", result.Meta.Page)
+	fmt.Printf("Page Count: %d\n", result.Meta.Total_pages)
 }
