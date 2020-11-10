@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -98,6 +99,35 @@ func writeToFile(filename string, data []byte) error {
 	return file.Sync()
 }
 
+func writeToCsv(result Response) {
+
+	csvFile, err := os.Create("./data.csv")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer csvFile.Close()
+	writer := csv.NewWriter(csvFile)
+
+	for _, s := range result.Virtual_visits.Data {
+		var row []string
+		row = append(row, s.Attributes.CallType)
+		row = append(row, s.Attributes.Owner)
+		row = append(row, s.Attributes.Widget)
+		row = append(row, s.Attributes.SessionID)
+		row = append(row, s.Attributes.Type)
+		row = append(row, s.Attributes.Title)
+		row = append(row, s.Attributes.Status)
+		row = append(row, s.Attributes.StartAt)
+		row = append(row, s.Attributes.JoinedAt)
+		row = append(row, s.Attributes.LeftAt)
+		row = append(row, fmt.Sprintf("%f", s.Attributes.Duration))
+		row = append(row, s.Attributes.DeviceBrowser)
+		row = append(row, s.Attributes.FailureReason)
+		writer.Write(row)
+	}
+	writer.Flush()
+}
+
 func main() {
 
 	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
@@ -110,7 +140,7 @@ func main() {
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
 	fromTime := "2020-11-05T00:00:00.000-06:00"
-	toTime := "2020-11-06T00:00:00.000-06:00"
+	toTime := "2020-11-05T07:00:00.000-06:00"
 
 	// var result map[string]interface{}
 	var result Response
@@ -128,11 +158,6 @@ func main() {
 
 		totalPages = result.Meta.Total_pages
 
-		// loop over the visit records
-		// for i, s := range result.Virtual_visits.Data {
-		// 	fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
-		// }
-
 		if thisPage+1 != result.Meta.Page {
 			fmt.Printf("Pages out of sync.\n")
 			break
@@ -146,9 +171,17 @@ func main() {
 			break
 		}
 
-		err := writeToFile("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
-		if err != nil {
-			log.Fatal(err)
+		doJSON := true
+		if doJSON {
+			err := writeToFile("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		doCSV := true
+		if doCSV {
+			writeToCsv(result)
 		}
 
 	}
