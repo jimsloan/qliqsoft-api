@@ -84,6 +84,20 @@ func fetchAPI(url string, token string, from string, to string, page int) []byte
 	return body
 }
 
+func writeToFile(filename string, data []byte) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	return file.Sync()
+}
+
 func main() {
 
 	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
@@ -96,7 +110,7 @@ func main() {
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
 	fromTime := "2020-11-05T00:00:00.000-06:00"
-	toTime := "2020-11-05T06:00:00.000-06:00"
+	toTime := "2020-11-06T00:00:00.000-06:00"
 
 	// var result map[string]interface{}
 	var result Response
@@ -115,9 +129,9 @@ func main() {
 		totalPages = result.Meta.Total_pages
 
 		// loop over the visit records
-		for i, s := range result.Virtual_visits.Data {
-			fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
-		}
+		// for i, s := range result.Virtual_visits.Data {
+		// 	fmt.Printf("%d - %s ~ %v\n", i, s.Attributes.SessionID, s.Attributes.Duration)
+		// }
 
 		if thisPage+1 != result.Meta.Page {
 			fmt.Printf("Pages out of sync.\n")
@@ -126,10 +140,15 @@ func main() {
 
 		if result.Meta.Count > 0 {
 			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.Total_pages, result.Meta.Items, result.Meta.Count)
-			fmt.Printf("------\n")
+			// fmt.Printf("------\n")
 		} else {
 			fmt.Printf("No records returned.\n")
 			break
+		}
+
+		err := writeToFile("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 	}
