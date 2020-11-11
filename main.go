@@ -85,7 +85,7 @@ func fetchAPI(url string, token string, from string, to string, page int) []byte
 	return body
 }
 
-func writeToFile(filename string, data []byte) error {
+func writeToJSON(filename string, data []byte) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -99,14 +99,34 @@ func writeToFile(filename string, data []byte) error {
 	return file.Sync()
 }
 
-func writeToCsv(result Response) {
+func writeToCsv(page int, result Response) {
 
-	csvFile, err := os.Create("./data.csv")
+	path := "./data.csv"
+
+	if page == 1 {
+		// remove file if it exist
+		if _, err := os.Stat(path); err == nil {
+			err := os.Remove(path)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+
+	fmt.Println("writeToCsv ... page:" + strconv.Itoa(page))
+
+	csvFile, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer csvFile.Close()
 	writer := csv.NewWriter(csvFile)
+
+	// write the headers
+	if page == 1 {
+		fmt.Println("writeToCsv ... Header")
+		writer.Write([]string{"Call_Type", "Owner", "Widget", "Session_ID", "Type", "Name", "Title", "Mobile_Number", "Status", "Start_At", "Joined_At", "Left_At", "Duration", "Device_Browser", "Failure_Reason", "date"})
+	}
 
 	for _, s := range result.Virtual_visits.Data {
 		var row []string
@@ -140,7 +160,7 @@ func main() {
 
 	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
 	fromTime := "2020-11-05T00:00:00.000-06:00"
-	toTime := "2020-11-05T07:00:00.000-06:00"
+	toTime := "2020-11-05T09:00:00.000-06:00"
 
 	// var result map[string]interface{}
 	var result Response
@@ -171,9 +191,9 @@ func main() {
 			break
 		}
 
-		doJSON := true
+		doJSON := false
 		if doJSON {
-			err := writeToFile("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
+			err := writeToJSON("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -181,7 +201,7 @@ func main() {
 
 		doCSV := true
 		if doCSV {
-			writeToCsv(result)
+			writeToCsv(result.Meta.Page, result)
 		}
 
 	}
