@@ -125,7 +125,7 @@ func writeToCsv(page int, result Response) {
 	// write the headers
 	if page == 1 {
 		fmt.Println("writeToCsv ... Header")
-		writer.Write([]string{"Call_Type", "Owner", "Widget", "Session_ID", "Type", "Title", "Mobile_Number", "Status", "Start_At", "Joined_At", "Left_At", "Duration", "Device_Browser", "Failure_Reason", "date"})
+		writer.Write([]string{"Call_Type", "Owner", "Widget", "Session_ID", "Type", "Title", "Status", "Start_At", "Joined_At", "Left_At", "Duration", "Device_Browser", "Failure_Reason"})
 	}
 
 	for _, s := range result.Virtual_visits.Data {
