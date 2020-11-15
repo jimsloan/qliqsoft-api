@@ -35,6 +35,56 @@ type Response struct {
 	}
 }
 
+type Runtime struct {
+	token    string
+	url      string
+	fromTime string
+	toTime   string
+}
+
+func run(runtime Runtime) {
+
+	// var result map[string]interface{}
+	var result Response
+
+	// call fetchAPI() until there are no more pages
+	thisPage := 1
+	for {
+		data := fetchAPI(runtime.url, runtime.token, runtime.fromTime, runtime.toTime, thisPage)
+
+		jsonErr := json.Unmarshal([]byte(data), &result)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+
+		if result.Meta.Count > 0 {
+			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.Total_pages, result.Meta.Items, result.Meta.Count)
+		} else {
+			fmt.Printf("No records returned.\n")
+			break
+		}
+
+		doJSON := true
+		if doJSON {
+			err := writeToJSON(result.Meta.Page, data)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		doCSV := true
+		if doCSV {
+			writeToCsv(result.Meta.Page, result)
+		}
+
+		if thisPage == result.Meta.Total_pages {
+			break
+		}
+		thisPage++
+
+	}
+}
+
 func fetchAPI(url string, token string, from string, to string, page int) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
@@ -70,7 +120,11 @@ func fetchAPI(url string, token string, from string, to string, page int) []byte
 	return body
 }
 
-func writeToJSON(filename string, data []byte) error {
+func writeToJSON(page int, data []byte) error {
+
+	fmt.Println("writeToJSON ... page:" + strconv.Itoa(page))
+
+	filename := "page-" + strconv.Itoa(page) + ".json"
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -132,6 +186,9 @@ func writeToCsv(page int, result Response) {
 
 func main() {
 
+	var runtime Runtime
+
+	// pass secrets via environment
 	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
 	if !ok {
 		log.Fatal("QLIQ_API_TOKEN not set\n")
@@ -140,50 +197,12 @@ func main() {
 		log.Fatal("QLIQ_API_TOKEN empty\n")
 	}
 
-	url := "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	fromTime := "2020-11-05T00:00:00.000-06:00"
-	toTime := "2020-11-05T09:00:00.000-06:00"
+	runtime.token = token
 
-	// var result map[string]interface{}
-	var result Response
+	// need to move these to parameters or config file
+	runtime.url = "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
+	runtime.fromTime = "2020-11-05T00:00:00.000-06:00"
+	runtime.toTime = "2020-11-05T09:00:00.000-06:00"
 
-	// call fetchAPI() until there are no more pages
-	totalPages := 1
-
-	for thisPage := 0; thisPage < totalPages; thisPage++ {
-		data := fetchAPI(url, token, fromTime, toTime, thisPage+1)
-
-		jsonErr := json.Unmarshal([]byte(data), &result)
-		if jsonErr != nil {
-			log.Fatal(jsonErr)
-		}
-
-		totalPages = result.Meta.Total_pages
-
-		if thisPage+1 != result.Meta.Page {
-			fmt.Printf("Pages out of sync.\n")
-			break
-		}
-
-		if result.Meta.Count > 0 {
-			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.Total_pages, result.Meta.Items, result.Meta.Count)
-			// fmt.Printf("------\n")
-		} else {
-			fmt.Printf("No records returned.\n")
-			break
-		}
-
-		doJSON := false
-		if doJSON {
-			err := writeToJSON("page-"+strconv.Itoa(result.Meta.Page)+".json", data)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		doCSV := true
-		if doCSV {
-			writeToCsv(result.Meta.Page, result)
-		}
-	}
+	run(runtime)
 }
