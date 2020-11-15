@@ -40,6 +40,7 @@ type Runtime struct {
 	url      string
 	fromTime string
 	toTime   string
+	page     int
 }
 
 func run(runtime Runtime) {
@@ -48,9 +49,9 @@ func run(runtime Runtime) {
 	var result Response
 
 	// call fetchAPI() until there are no more pages
-	thisPage := 1
+
 	for {
-		data := fetchAPI(runtime.url, runtime.token, runtime.fromTime, runtime.toTime, thisPage)
+		data := fetchAPI(runtime)
 
 		jsonErr := json.Unmarshal([]byte(data), &result)
 		if jsonErr != nil {
@@ -64,7 +65,7 @@ func run(runtime Runtime) {
 			break
 		}
 
-		doJSON := true
+		doJSON := false
 		if doJSON {
 			err := writeToJSON(result.Meta.Page, data)
 			if err != nil {
@@ -72,37 +73,37 @@ func run(runtime Runtime) {
 			}
 		}
 
-		doCSV := true
+		doCSV := false
 		if doCSV {
 			writeToCsv(result.Meta.Page, result)
 		}
 
-		if thisPage == result.Meta.Total_pages {
+		if runtime.page == result.Meta.Total_pages {
 			break
 		}
-		thisPage++
+		runtime.page++
 
 	}
 }
 
-func fetchAPI(url string, token string, from string, to string, page int) []byte {
+func fetchAPI(runtime Runtime) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", runtime.url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	q := req.URL.Query()
-	q.Add("from_time", from)
-	q.Add("to_time", to)
-	q.Add("page", strconv.Itoa(page))
+	q.Add("from_time", runtime.fromTime)
+	q.Add("to_time", runtime.toTime)
+	q.Add("page", strconv.Itoa(runtime.page))
 
 	req.URL.RawQuery = q.Encode()
 
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", runtime.token)
 	res, getErr := client.Do(req)
 	if getErr != nil {
 		log.Fatal(getErr)
@@ -203,6 +204,6 @@ func main() {
 	runtime.url = "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
 	runtime.fromTime = "2020-11-05T00:00:00.000-06:00"
 	runtime.toTime = "2020-11-05T09:00:00.000-06:00"
-
+	runtime.page = 1
 	run(runtime)
 }
