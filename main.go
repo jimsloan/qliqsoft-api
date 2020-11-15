@@ -8,30 +8,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
 
-type Attributes struct {
-	CallType      string
-	Owner         string
-	Widget        string
-	SessionID     string
-	Type          string
-	Title         string
-	Status        string
-	StartAt       string
-	JoinedAt      string
-	LeftAt        string
-	Duration      float64
-	DeviceBrowser string
-	FailureReason string
-}
-
 type Data struct {
 	Id         string
 	Type       string
-	Attributes Attributes
+	Attributes map[string]interface{}
 }
 
 type Response struct {
@@ -101,6 +86,13 @@ func writeToJSON(filename string, data []byte) error {
 
 func writeToCsv(page int, result Response) {
 
+	// create header from sorted map keys
+	keys := make([]string, 0, len(result.Virtual_visits.Data[0].Attributes))
+	for k := range result.Virtual_visits.Data[0].Attributes {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
 	path := "./data.csv"
 
 	if page == 1 {
@@ -125,24 +117,14 @@ func writeToCsv(page int, result Response) {
 	// write the headers
 	if page == 1 {
 		fmt.Println("writeToCsv ... Header")
-		writer.Write([]string{"Call_Type", "Owner", "Widget", "Session_ID", "Type", "Title", "Status", "Start_At", "Joined_At", "Left_At", "Duration", "Device_Browser", "Failure_Reason"})
+		writer.Write(keys)
 	}
 
 	for _, s := range result.Virtual_visits.Data {
 		var row []string
-		row = append(row, s.Attributes.CallType)
-		row = append(row, s.Attributes.Owner)
-		row = append(row, s.Attributes.Widget)
-		row = append(row, s.Attributes.SessionID)
-		row = append(row, s.Attributes.Type)
-		row = append(row, s.Attributes.Title)
-		row = append(row, s.Attributes.Status)
-		row = append(row, s.Attributes.StartAt)
-		row = append(row, s.Attributes.JoinedAt)
-		row = append(row, s.Attributes.LeftAt)
-		row = append(row, fmt.Sprintf("%f", s.Attributes.Duration))
-		row = append(row, s.Attributes.DeviceBrowser)
-		row = append(row, s.Attributes.FailureReason)
+		for _, k := range keys {
+			row = append(row, fmt.Sprint(s.Attributes[k]))
+		}
 		writer.Write(row)
 	}
 	writer.Flush()
@@ -203,6 +185,5 @@ func main() {
 		if doCSV {
 			writeToCsv(result.Meta.Page, result)
 		}
-
 	}
 }
