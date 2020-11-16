@@ -13,28 +13,31 @@ import (
 	"time"
 )
 
+// Data ...
 type Data struct {
-	Id         string
-	Type       string
-	Attributes map[string]interface{}
+	ID         string                 `json:"id"`
+	Type       string                 `json:"type"`
+	Attributes map[string]interface{} `json:"attributes"`
 }
 
+// Response ...
 type Response struct {
-	Virtual_visits struct {
+	VirtualVisits struct {
 		Data []Data
-	}
+	} `json:"virtual_visits"`
 	Meta struct {
 		Filters struct {
-			From_time string
-			To_time   string
+			FromTime string `json:"from_time"`
+			ToTime   string `json:"to_time"`
 		}
-		Page        int
-		Items       int
-		Count       int
-		Total_pages int
+		Page       int `json:"page"`
+		Items      int `json:"items"`
+		Count      int `json:"count"`
+		TotalPages int `json:"total_pages"`
 	}
 }
 
+// Runtime ...
 type Runtime struct {
 	token    string
 	url      string
@@ -59,13 +62,13 @@ func run(runtime Runtime) {
 		}
 
 		if result.Meta.Count > 0 {
-			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.Total_pages, result.Meta.Items, result.Meta.Count)
+			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.TotalPages, result.Meta.Items, result.Meta.Count)
 		} else {
 			fmt.Printf("No records returned.\n")
 			break
 		}
 
-		doJSON := false
+		doJSON := true
 		if doJSON {
 			err := writeToJSON(result.Meta.Page, data)
 			if err != nil {
@@ -73,12 +76,12 @@ func run(runtime Runtime) {
 			}
 		}
 
-		doCSV := false
+		doCSV := true
 		if doCSV {
 			writeToCsv(result.Meta.Page, result)
 		}
 
-		if runtime.page == result.Meta.Total_pages {
+		if runtime.page == result.Meta.TotalPages {
 			break
 		}
 		runtime.page++
@@ -142,8 +145,8 @@ func writeToJSON(page int, data []byte) error {
 func writeToCsv(page int, result Response) {
 
 	// create header from sorted map keys
-	keys := make([]string, 0, len(result.Virtual_visits.Data[0].Attributes))
-	for k := range result.Virtual_visits.Data[0].Attributes {
+	keys := make([]string, 0, len(result.VirtualVisits.Data[0].Attributes))
+	for k := range result.VirtualVisits.Data[0].Attributes {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -175,7 +178,7 @@ func writeToCsv(page int, result Response) {
 		writer.Write(keys)
 	}
 
-	for _, s := range result.Virtual_visits.Data {
+	for _, s := range result.VirtualVisits.Data {
 		var row []string
 		for _, k := range keys {
 			row = append(row, fmt.Sprint(s.Attributes[k]))
