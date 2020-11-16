@@ -48,12 +48,12 @@ type Runtime struct {
 
 func run(runtime Runtime) {
 
-	// var result map[string]interface{}
 	var result Response
 
 	// call fetchAPI() until there are no more pages
-
 	for {
+
+		// request data
 		data := fetchAPI(runtime)
 
 		jsonErr := json.Unmarshal([]byte(data), &result)
@@ -61,6 +61,7 @@ func run(runtime Runtime) {
 			log.Fatal(jsonErr)
 		}
 
+		// output results
 		if result.Meta.Count > 0 {
 			fmt.Printf("Page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.TotalPages, result.Meta.Items, result.Meta.Count)
 		} else {
@@ -68,7 +69,7 @@ func run(runtime Runtime) {
 			break
 		}
 
-		doJSON := true
+		doJSON := false
 		if doJSON {
 			err := writeToJSON(result.Meta.Page, data)
 			if err != nil {
@@ -76,11 +77,17 @@ func run(runtime Runtime) {
 			}
 		}
 
-		doCSV := true
+		doCSV := false
 		if doCSV {
 			writeToCsv(result.Meta.Page, result)
 		}
 
+		// sanity check: page count should never exceed the total pages
+		if runtime.page > result.Meta.TotalPages {
+			log.Fatal("Page count exceeded total pages")
+		}
+
+		// check page count and either repeat or exit
 		if runtime.page == result.Meta.TotalPages {
 			break
 		}
