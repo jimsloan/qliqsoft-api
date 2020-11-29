@@ -37,8 +37,8 @@ type Response struct {
 	}
 }
 
-// Runtime ...
-type Runtime struct {
+// Config ...
+type Config struct {
 	token    string
 	url      string
 	fromTime string
@@ -46,7 +46,7 @@ type Runtime struct {
 	page     int
 }
 
-func run(runtime Runtime) {
+func run(conf Config) {
 
 	var result Response
 
@@ -54,7 +54,7 @@ func run(runtime Runtime) {
 	for {
 
 		// request data
-		data := fetchAPI(runtime)
+		data := fetchAPI(conf)
 
 		jsonErr := json.Unmarshal([]byte(data), &result)
 		if jsonErr != nil {
@@ -77,26 +77,26 @@ func run(runtime Runtime) {
 			}
 		}
 
-		doCSV := false
+		doCSV := true
 		if doCSV {
 			writeToCsv(result.Meta.Page, result)
 		}
 
 		// sanity check: page count should never exceed the total pages
-		if runtime.page > result.Meta.TotalPages {
+		if conf.page > result.Meta.TotalPages {
 			log.Fatal("Page count exceeded total pages")
 		}
 
 		// check page count and either repeat or exit
-		if runtime.page == result.Meta.TotalPages {
+		if conf.page == result.Meta.TotalPages {
 			break
 		}
-		runtime.page++
+		conf.page++
 
 	}
 }
 
-func fetchAPI(runtime Runtime) []byte {
+func fetchAPI(runtime Config) []byte {
 	client := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
@@ -197,7 +197,7 @@ func writeToCsv(page int, result Response) {
 
 func main() {
 
-	var runtime Runtime
+	var runtime Config
 
 	// pass secrets via environment
 	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
@@ -207,7 +207,6 @@ func main() {
 	if len(token) == 0 {
 		log.Fatal("QLIQ_API_TOKEN empty\n")
 	}
-
 	runtime.token = token
 
 	// need to move these to parameters or config file
