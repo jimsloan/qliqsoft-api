@@ -37,8 +37,8 @@ type Response struct {
 	}
 }
 
-// Run ...
-func Run() {
+// Qliqsoft ...
+func Qliqsoft() {
 
 	var result Response
 	var conf fetch.Config

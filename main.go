@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	run.Run()
+	run.Qliqsoft()
 }
