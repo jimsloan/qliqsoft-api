@@ -54,13 +54,15 @@ func Qliqsoft() {
 	conf.Token = token
 
 	// need to move these to parameters or config file
-	conf.URL = "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	conf.FromTime = "2020-11-05T00:00:00.000-06:00"
-	conf.ToTime = "2020-11-05T09:00:00.000-06:00"
+	conf.URL = "https://webprod.qliqsoft.com/quincy_api/v1/reports/virtual_visits"
+	conf.FromTime = "2021-02-03T00:00:00.000-06:00"
+	conf.ToTime = "2021-02-04T09:00:00.000-06:00"
 	conf.Page = 1
+	conf.PerPage = 1000
+	conf.Email = "js2241139@trinity-health.org"
 
-	doJSON := false
-	doCSV := true
+	doJSON := true
+	doCSV := false
 
 	// call fetchAPI() until there are no more pages
 	var arrayrow [][]string
