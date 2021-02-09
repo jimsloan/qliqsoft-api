@@ -13,6 +13,7 @@ type Config struct {
 	Token    string
 	Email    string
 	URL      string
+	Endpoint string
 	FromTime string
 	ToTime   string
 	Page     int
@@ -25,20 +26,19 @@ func API(runtime Config) []byte {
 		Timeout: time.Second * 20, // Timeout after 2 seconds
 	}
 
-	req, err := http.NewRequest("GET", runtime.URL, nil)
+	req, err := http.NewRequest("GET", runtime.URL+runtime.Endpoint, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	q := req.URL.Query()
-	q.Add("from_time", runtime.FromTime)
-	q.Add("to_time", runtime.ToTime)
+	//q.Add("from_time", runtime.FromTime)
+	//q.Add("to_time", runtime.ToTime)
 	q.Add("page", strconv.Itoa(runtime.Page))
 	q.Add("per_page", strconv.Itoa(runtime.PerPage))
 
 	req.URL.RawQuery = q.Encode()
 
-	//req.Header.Set("Authorization", runtime.Token)
 	req.SetBasicAuth(runtime.Email, runtime.Token)
 	res, getErr := client.Do(req)
 	if getErr != nil {
