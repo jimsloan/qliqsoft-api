@@ -43,7 +43,7 @@ func Qliqsoft(endpoint string) {
 	conf.ToTime = ""   //"2021-02-25T16:59:59-06:00"
 	conf.Page = 1
 	conf.PerPage = 1
-	conf.Email = "hagedol9@trinity-health.org"
+	conf.Email = "js2241139@trinity-health.org"
 
 	limitPages := 1
 
