@@ -5,5 +5,8 @@ import (
 )
 
 func main() {
-	run.Qliqsoft()
+	// API endpoints
+	// patients, agents, widgets, conversations, invitation_history, terms_and_conditions, opt_outs, forms, device_tests, virtual_visits
+
+	run.Qliqsoft("widgets")
 }

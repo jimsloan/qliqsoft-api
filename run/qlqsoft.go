@@ -10,9 +10,6 @@ import (
 	"github.com/jimsloan/qliqsoft-api/fetch"
 )
 
-var Endpoint = "virtual_visits"
-var conf fetch.Config
-
 // Response ...
 type Response struct {
 	Meta struct {
@@ -24,7 +21,7 @@ type Response struct {
 }
 
 // Qliqsoft ...
-func Qliqsoft() {
+func Qliqsoft(endpoint string) {
 
 	var result Response
 	var conf fetch.Config
@@ -41,12 +38,12 @@ func Qliqsoft() {
 
 	// need to move these to parameters or config file
 	conf.URL = "https://webprod.qliqsoft.com/quincy_api/v1/reports/"
-	conf.Endpoint = Endpoint
-	conf.FromTime = "2021-02-07T17:00:00.000-06:00"
-	conf.ToTime = "2021-02-08T00:00:00.000-06:00"
+	conf.Endpoint = endpoint
+	conf.FromTime = "" // "2021-02-24T17:00:00-06:00"
+	conf.ToTime = ""   //"2021-02-25T16:59:59-06:00"
 	conf.Page = 1
 	conf.PerPage = 1
-	conf.Email = "js2241139@trinity-health.org"
+	conf.Email = "hagedol9@trinity-health.org"
 
 	limitPages := 1
 
@@ -63,7 +60,7 @@ func Qliqsoft() {
 		}
 
 		// write out the json
-		err := WriteToJSON(Endpoint, result.Meta.Page, data)
+		err := WriteToJSON(endpoint, result.Meta.Page, data)
 		if err != nil {
 			log.Fatal(err)
 		}

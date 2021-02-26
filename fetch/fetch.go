@@ -23,7 +23,7 @@ type Config struct {
 //API ...
 func API(runtime Config) []byte {
 	client := http.Client{
-		Timeout: time.Second * 20, // Timeout after 2 seconds
+		Timeout: time.Second * 30, // Timeout after 2 seconds
 	}
 
 	req, err := http.NewRequest("GET", runtime.URL+runtime.Endpoint, nil)
@@ -32,8 +32,10 @@ func API(runtime Config) []byte {
 	}
 
 	q := req.URL.Query()
-	//q.Add("from_time", runtime.FromTime)
-	//q.Add("to_time", runtime.ToTime)
+	if runtime.FromTime > "" && runtime.ToTime > "" {
+		q.Add("from_time", runtime.FromTime)
+		q.Add("to_time", runtime.ToTime)
+	}
 	q.Add("page", strconv.Itoa(runtime.Page))
 	q.Add("per_page", strconv.Itoa(runtime.PerPage))
 
