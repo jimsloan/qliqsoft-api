@@ -21,31 +21,9 @@ type Response struct {
 }
 
 // Qliqsoft ...
-func Qliqsoft(endpoint string) {
+func Qliqsoft(conf fetch.Config, limitPages int) {
 
 	var result Response
-	var conf fetch.Config
-
-	// pass secrets via environment
-	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
-	if !ok {
-		log.Fatal("QLIQ_API_TOKEN not set\n")
-	}
-	if len(token) == 0 {
-		log.Fatal("QLIQ_API_TOKEN empty\n")
-	}
-	conf.Token = token
-
-	// need to move these to parameters or config file
-	conf.URL = "https://webprod.qliqsoft.com/quincy_api/v1/reports/"
-	conf.Endpoint = endpoint
-	conf.FromTime = "" // "2021-02-24T17:00:00-06:00"
-	conf.ToTime = ""   //"2021-02-25T16:59:59-06:00"
-	conf.Page = 1
-	conf.PerPage = 1
-	conf.Email = "js2241139@trinity-health.org"
-
-	limitPages := 1
 
 	// call fetchAPI() until there are no more pages
 	for {
@@ -60,7 +38,7 @@ func Qliqsoft(endpoint string) {
 		}
 
 		// write out the json
-		err := WriteToJSON(endpoint, result.Meta.Page, data)
+		err := WriteToJSON(conf.Endpoint, result.Meta.Page, data)
 		if err != nil {
 			log.Fatal(err)
 		}
