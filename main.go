@@ -24,8 +24,8 @@ func main() {
 
 	secrets := configuration.GetSecrets()
 
-	var apiconf fetch.Config
 	var limit int = cfg.Control.Limit
+	var apiconf fetch.Config
 
 	apiconf.Email = secrets.AdminEmail
 	apiconf.Token = secrets.Token
@@ -33,8 +33,6 @@ func main() {
 	apiconf.Endpoint = cfg.API.Endpoint
 	apiconf.FromTime = cfg.Filter.FromTime
 	apiconf.ToTime = cfg.Filter.ToTime
-
-	// paging control
 	apiconf.Page = cfg.Control.Page
 	apiconf.PerPage = cfg.Control.PerPage
 
