@@ -24,6 +24,7 @@ type Response struct {
 func Qliqsoft(conf fetch.Config, limitPages int) {
 
 	var result Response
+	var pagecount int = 0
 
 	// call fetchAPI() until there are no more pages
 	for {
@@ -63,7 +64,8 @@ func Qliqsoft(conf fetch.Config, limitPages int) {
 
 		// is there a page limit on the requests
 		if limitPages > 0 {
-			if conf.Page == limitPages {
+			pagecount++
+			if pagecount == limitPages {
 				break
 			}
 		}
