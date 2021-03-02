@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -24,14 +25,14 @@ type Config struct {
 }
 
 // NewConfig returns a new decoded Config struct
-func NewConfig(configPath string) (*Config, error) {
+func NewConfig(configPath string) *Config {
 	// Create config structure
 	config := &Config{}
 
 	// Open config file
 	file, err := os.Open(configPath)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	defer file.Close()
 
@@ -40,8 +41,8 @@ func NewConfig(configPath string) (*Config, error) {
 
 	// Start YAML decoding from file
 	if err := d.Decode(&config); err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	return config, nil
+	return config
 }

@@ -17,10 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cfg, err := configuration.NewConfig(flags.ConfigPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := configuration.NewConfig(flags.ConfigPath)
 
 	secrets := configuration.GetSecrets()
 

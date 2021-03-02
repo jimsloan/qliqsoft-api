@@ -9,6 +9,11 @@ import (
 // CliFlag struct ...
 type CliFlag struct {
 	ConfigPath string
+	Report     string
+	FromTime   string
+	ToTime     string
+	Page       int
+	PerPage    int
 	Limit      int
 }
 
@@ -18,16 +23,29 @@ func ParseFlags() (CliFlag, error) {
 	// Struct that contains the configured configuration path
 	var flags CliFlag
 
-	// Set up a CLI flag called "-config" to allow users
-	// to supply the configuration file
-	flag.StringVar(&flags.ConfigPath, "config", "./config.yml", "path to config file")
+	// CLI flag called "-config" to supply the configuration file
+	flag.StringVar(&flags.ConfigPath, "config", "", "path to config file")
+
+	// CLI flag called "-report" to select the endpoint
+	flag.StringVar(&flags.Report, "report", "", "report endpoint to query")
+
+	// CLI flag called "-page"
+	flag.IntVar(&flags.Page, "page", 0, "1 or more starting page")
+
+	// CLI flag called "-perpage"
+	flag.IntVar(&flags.PerPage, "perpage", 0, "1 or more records per page")
+
+	// CLI flag called "-limit"
+	flag.IntVar(&flags.Limit, "limit", 0, "1 or more to limit the number of pages requested")
 
 	// Actually parse the flags
 	flag.Parse()
 
-	// Validate the path first
-	if err := ValidateConfigPath(flags.ConfigPath); err != nil {
-		return flags, err
+	// Validate the path if set
+	if flags.ConfigPath > "" {
+		if err := ValidateConfigPath(flags.ConfigPath); err != nil {
+			return flags, err
+		}
 	}
 
 	// Return the flags
