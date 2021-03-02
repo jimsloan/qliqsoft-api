@@ -1,0 +1,17 @@
+# Quincy Reports
+api: 
+  baseurl: https://webprod.qliqsoft.com/quincy_api/v1/reports/
+
+  # patients, agents, widgets, conversations, invitation_history, terms_and_conditions, opt_outs, forms, device_tests, virtual_visits
+  endpoint: virtual_visits
+
+filter:
+  fromtime: 2021-03-01T00:00:00-06:00
+  totime: 2021-03-02T00:00:00-06:00
+
+control:
+  startpage: 1
+  recordsperpage: 1000
+  pagelimit: 0
+
+

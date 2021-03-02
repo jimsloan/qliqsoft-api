@@ -5,66 +5,27 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
+	"strconv"
 
 	"github.com/jimsloan/qliqsoft-api/fetch"
-	"github.com/jimsloan/qliqsoft-api/output"
 )
-
-var conf fetch.Config
-
-// Data ...
-type Data struct {
-	ID         string                 `json:"id"`
-	Type       string                 `json:"type"`
-	Attributes map[string]interface{} `json:"attributes"`
-}
 
 // Response ...
 type Response struct {
-	VirtualVisits struct {
-		Data []Data
-	} `json:"virtual_visits"`
 	Meta struct {
-		Filters struct {
-			FromTime string `json:"from_time"`
-			ToTime   string `json:"to_time"`
-		}
 		Page       int `json:"page"`
 		Items      int `json:"items"`
 		Count      int `json:"count"`
 		TotalPages int `json:"total_pages"`
-	}
+	} `json:"meta"`
 }
 
 // Qliqsoft ...
-func Qliqsoft() {
+func Qliqsoft(conf fetch.Config, limitPages int) {
 
 	var result Response
-	var conf fetch.Config
-
-	// pass secrets via environment
-	token, ok := os.LookupEnv("QLIQ_API_TOKEN")
-	if !ok {
-		log.Fatal("QLIQ_API_TOKEN not set\n")
-	}
-	if len(token) == 0 {
-		log.Fatal("QLIQ_API_TOKEN empty\n")
-	}
-	conf.Token = token
-
-	// need to move these to parameters or config file
-	conf.URL = "https://webprod.qliqsoft.com/quincy_api/v1/virtual_visits"
-	conf.FromTime = "2020-11-05T00:00:00.000-06:00"
-	conf.ToTime = "2020-11-05T09:00:00.000-06:00"
-	conf.Page = 1
-
-	doJSON := false
-	doCSV := true
 
 	// call fetchAPI() until there are no more pages
-	var arrayrow [][]string
-
 	for {
 
 		// fetch API data
@@ -76,14 +37,13 @@ func Qliqsoft() {
 			log.Fatal(jsonErr)
 		}
 
-		if doJSON {
-			err := output.WriteToJSON(result.Meta.Page, data)
-			if err != nil {
-				log.Fatal(err)
-			}
+		// write out the json
+		err := WriteToJSON(conf.Endpoint, result.Meta.Page, data)
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		// output results
+		// send fome logging info to stdout
 		if result.Meta.Count > 0 {
 			fmt.Printf("Fetching page %d of %d; %d items (%d)\n", result.Meta.Page, result.Meta.TotalPages, result.Meta.Items, result.Meta.Count)
 		} else {
@@ -96,39 +56,38 @@ func Qliqsoft() {
 			log.Fatal("Page count exceeded total pages")
 		}
 
-		if doCSV {
-			var row []string
-
-			// create header from sorted map keys
-			keys := make([]string, 0, len(result.VirtualVisits.Data[0].Attributes))
-			for k := range result.VirtualVisits.Data[0].Attributes {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			if result.Meta.Page == 1 {
-				arrayrow = append(arrayrow, keys)
-			}
-
-			for _, s := range result.VirtualVisits.Data {
-				for _, k := range keys {
-					row = append(row, fmt.Sprint(s.Attributes[k]))
-				}
-				arrayrow = append(arrayrow, row)
-				row = nil
-			}
-
-			//writeToCsv(result.Meta.Page, result)
-		}
-
-		// check page count and either repeat or exit
+		// check page count and either continue or exit
 		if conf.Page == result.Meta.TotalPages {
 			break
+		}
+
+		// is there a page limit on the requests
+		if limitPages > 0 {
+			if conf.Page == limitPages {
+				break
+			}
 		}
 
 		conf.Page++
 
 	}
-	if doCSV {
-		output.WriteToCsv(arrayrow)
+}
+
+// WriteToJSON ...
+func WriteToJSON(name string, page int, data []byte) error {
+
+	fmt.Println("writeToJSON ... page:" + strconv.Itoa(page))
+
+	filename := "./var/" + name + "-" + strconv.Itoa(page) + ".json"
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
 	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	return file.Sync()
 }
