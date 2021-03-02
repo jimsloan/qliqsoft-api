@@ -13,5 +13,6 @@ control:
   startpage: 1
   recordsperpage: 1000
   pagelimit: 0
+  outputpath: "./var/"
 
 

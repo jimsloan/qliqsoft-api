@@ -3,12 +3,14 @@ package configuration
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
-// CliFlag struct ...
-type CliFlag struct {
+// Cliflags struct ...
+type Cliflags struct {
 	ConfigPath string
+	Outputpath string
 	Report     string
 	FromTime   string
 	ToTime     string
@@ -19,18 +21,21 @@ type CliFlag struct {
 
 // ParseFlags will create and parse the CLI flags
 // and return the path to be used elsewhere
-func ParseFlags() (CliFlag, error) {
+func ParseFlags() Cliflags {
 	// Struct that contains the configured configuration path
-	var flags CliFlag
+	var flags Cliflags
 
 	// CLI flag called "-config" to supply the configuration file
-	flag.StringVar(&flags.ConfigPath, "config", "", "path to config file")
+	flag.StringVar(&flags.ConfigPath, "config", "", "path to a config file")
+
+	// CLI flag called "-outpath" to supply the path for the output
+	flag.StringVar(&flags.Outputpath, "outpath", "", "path for the output")
 
 	// CLI flag called "-report" to select the endpoint
 	flag.StringVar(&flags.Report, "report", "", "report endpoint to query")
 
 	// CLI flag called "-page"
-	flag.IntVar(&flags.Page, "page", 0, "1 or more starting page")
+	flag.IntVar(&flags.Page, "page", 0, "starting page")
 
 	// CLI flag called "-perpage"
 	flag.IntVar(&flags.PerPage, "perpage", 0, "1 or more records per page")
@@ -44,12 +49,20 @@ func ParseFlags() (CliFlag, error) {
 	// Validate the path if set
 	if flags.ConfigPath > "" {
 		if err := ValidateConfigPath(flags.ConfigPath); err != nil {
-			return flags, err
+			log.Fatal("invalid config path")
+		}
+	}
+
+	// Validate the path if set
+	if flags.Outputpath > "" {
+		_, err := os.Stat(flags.Outputpath)
+		if err != nil {
+			log.Fatal("invalid output path")
 		}
 	}
 
 	// Return the flags
-	return flags, nil
+	return flags
 }
 
 // ValidateConfigPath just makes sure, that the path provided is a file,

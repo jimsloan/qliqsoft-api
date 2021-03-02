@@ -6,27 +6,17 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/jimsloan/qliqsoft-api/configuration"
 )
 
-// Config ...
-type Config struct {
-	Token    string
-	Email    string
-	URL      string
-	Endpoint string
-	FromTime string
-	ToTime   string
-	Page     int
-	PerPage  int
-}
-
 //API ...
-func API(runtime Config) []byte {
+func API(runtime configuration.Config) []byte {
 	client := http.Client{
 		Timeout: time.Second * 30, // Timeout after 2 seconds
 	}
 
-	req, err := http.NewRequest("GET", runtime.URL+runtime.Endpoint, nil)
+	req, err := http.NewRequest("GET", runtime.Baseurl+runtime.Report, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

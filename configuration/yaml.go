@@ -7,8 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Config struct ...
-type Config struct {
+// Yamlconfig struct ...
+type Yamlconfig struct {
 	API struct {
 		BaseURL  string `yaml:"baseurl"`
 		Endpoint string `yaml:"endpoint"`
@@ -18,16 +18,17 @@ type Config struct {
 		ToTime   string `yaml:"totime"`
 	}
 	Control struct {
-		Page    int `yaml:"startpage"`
-		PerPage int `yaml:"recordsperpage"`
-		Limit   int `yaml:"pagelimit"`
+		Page       int    `yaml:"startpage"`
+		PerPage    int    `yaml:"recordsperpage"`
+		Limit      int    `yaml:"pagelimit"`
+		Outputpath string `yaml:"outputpath"`
 	} `yaml:"control"`
 }
 
-// NewConfig returns a new decoded Config struct
-func NewConfig(configPath string) *Config {
+// GetYaml returns a new decoded Config struct
+func GetYaml(configPath string) Yamlconfig {
 	// Create config structure
-	config := &Config{}
+	var config Yamlconfig
 
 	// Open config file
 	file, err := os.Open(configPath)

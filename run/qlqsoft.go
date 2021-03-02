@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/jimsloan/qliqsoft-api/configuration"
 	"github.com/jimsloan/qliqsoft-api/fetch"
 )
 
@@ -21,7 +22,7 @@ type Response struct {
 }
 
 // Qliqsoft ...
-func Qliqsoft(conf fetch.Config, limitPages int) {
+func Qliqsoft(conf configuration.Config) {
 
 	var result Response
 	var pagecount int = 0
@@ -39,7 +40,7 @@ func Qliqsoft(conf fetch.Config, limitPages int) {
 		}
 
 		// write out the json
-		err := WriteToJSON(conf.Endpoint, result.Meta.Page, data)
+		err := WriteToJSON(conf.Outputpath, conf.Report, result.Meta.Page, data)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,9 +64,9 @@ func Qliqsoft(conf fetch.Config, limitPages int) {
 		}
 
 		// is there a page limit on the requests
-		if limitPages > 0 {
+		if conf.Limit > 0 {
 			pagecount++
-			if pagecount == limitPages {
+			if pagecount == conf.Limit {
 				break
 			}
 		}
@@ -76,11 +77,11 @@ func Qliqsoft(conf fetch.Config, limitPages int) {
 }
 
 // WriteToJSON ...
-func WriteToJSON(name string, page int, data []byte) error {
+func WriteToJSON(path string, name string, page int, data []byte) error {
 
 	fmt.Println("writeToJSON ... page:" + strconv.Itoa(page))
 
-	filename := "./var/" + name + "-" + strconv.Itoa(page) + ".json"
+	filename := path + name + "-" + strconv.Itoa(page) + ".json"
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

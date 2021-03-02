@@ -5,15 +5,15 @@ import (
 	"os"
 )
 
-// Secrets ...
-type Secrets struct {
+// Envars ...
+type Envars struct {
 	AdminEmail string
 	Token      string
 }
 
-// GetSecrets ...
-func GetSecrets() Secrets {
-	var secrets Secrets
+// Getenv ...
+func Getenv() Envars {
+	var secrets Envars
 
 	// pass secrets via environment
 	email, ok := os.LookupEnv("QLIQ_ADMIN_EMAIL")
