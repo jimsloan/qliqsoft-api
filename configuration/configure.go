@@ -1,6 +1,11 @@
 package configuration
 
-import "log"
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+)
 
 // Config struct ...
 type Config struct {
@@ -38,38 +43,50 @@ func Configure() Config {
 	apiconf.Baseurl = cfg.API.BaseURL
 
 	if flags.Report > "" {
+		fmt.Println("page:" + flags.Report)
 		apiconf.Report = flags.Report
 	} else {
 		apiconf.Report = cfg.API.Endpoint
 	}
 
-	if flags.FromTime > "" && flags.ToTime > "" {
-		apiconf.FromTime = flags.FromTime
-		apiconf.ToTime = flags.ToTime
+	if flags.Filters > "" {
+
+		// add parse for filters
+		fmt.Println("filters:" + flags.Filters)
+		s := strings.Split(flags.Filters, ",")
+		fmt.Println(s)
+
+		// use YAML fo now
+		apiconf.FromTime = cfg.Filter.FromTime
+		apiconf.ToTime = cfg.Filter.ToTime
 	} else {
 		apiconf.FromTime = cfg.Filter.FromTime
 		apiconf.ToTime = cfg.Filter.ToTime
 	}
 
 	if flags.Page > 0 {
+		fmt.Println("page:" + strconv.Itoa(flags.Page))
 		apiconf.Page = flags.Page
 	} else {
 		apiconf.Page = cfg.Control.Page
 	}
 
 	if flags.PerPage > 0 {
+		fmt.Println("perpage:" + strconv.Itoa(flags.PerPage))
 		apiconf.PerPage = flags.PerPage
 	} else {
 		apiconf.PerPage = cfg.Control.PerPage
 	}
 
 	if flags.Limit > 0 {
+		fmt.Println("limit:" + strconv.Itoa(flags.Limit))
 		apiconf.Limit = flags.Limit
 	} else {
 		apiconf.Limit = cfg.Control.Limit
 	}
 
 	if flags.Outputpath > "" {
+		fmt.Println("page:" + flags.Outputpath)
 		apiconf.Outputpath = flags.Outputpath
 	} else {
 		apiconf.Outputpath = cfg.Control.Outputpath

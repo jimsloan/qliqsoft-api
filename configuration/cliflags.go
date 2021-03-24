@@ -12,8 +12,7 @@ type Cliflags struct {
 	ConfigPath string
 	Outputpath string
 	Report     string
-	FromTime   string
-	ToTime     string
+	Filters    string
 	Page       int
 	PerPage    int
 	Limit      int
@@ -33,6 +32,9 @@ func ParseFlags() Cliflags {
 
 	// CLI flag called "-report" to select the endpoint
 	flag.StringVar(&flags.Report, "report", "", "report endpoint to query")
+
+	// CLI flag called "-report" to select the endpoint
+	flag.StringVar(&flags.Filters, "filters", "", "pass filters for the query")
 
 	// CLI flag called "-page"
 	flag.IntVar(&flags.Page, "page", 0, "starting page")
