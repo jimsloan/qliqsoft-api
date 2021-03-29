@@ -1,7 +1,6 @@
 package fetch
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,17 +32,9 @@ func API(runtime configuration.Config) []byte {
 	q.Add("per_page", strconv.Itoa(runtime.PerPage))
 
 	// add the filters
-
-	fmt.Print("\n--[Filters]--\n")
-	fmt.Printf("%#+v", runtime.Filters)
-	// for a, b := range runtime.Filters {
-	// 	fmt.Printf("\t%s = %s\n", a, b)
-	// }
-
-	//if runtime.FromTime > "" && runtime.ToTime > "" {
-	q.Add("from_time", "2021-03-28T00:00:00-06:00")
-	//q.Add("to_time", "2021-03-29T00:00:00-06:00")
-	//}
+	for name, value := range runtime.Filters {
+		q.Add(name, value)
+	}
 
 	req.URL.RawQuery = q.Encode()
 

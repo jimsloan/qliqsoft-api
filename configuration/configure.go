@@ -13,7 +13,7 @@ type Config struct {
 	Email      string
 	Token      string
 	Report     string
-	Filters    map[string]interface{}
+	Filters    map[string]string
 	Page       int
 	PerPage    int
 	Limit      int
@@ -48,16 +48,8 @@ func Configure() Config {
 		apiconf.Report = cfg.API.Endpoint
 	}
 
-	if flags.Filters > "" {
-
-		// add parse for filters
-		fmt.Println("filters:" + flags.Filters)
-		s := strings.Split(flags.Filters, ",")
-		fmt.Println(s)
-		// apiconf.Filters = flags.Filters
-	} else {
-		apiconf.Filters = cfg.Filters
-	}
+	// merge filters from cli and yaml
+	apiconf.Filters = mergefilters(flags.Filters, cfg.Filters)
 
 	if flags.Page > 0 {
 		fmt.Println("page:" + strconv.Itoa(flags.Page))
@@ -88,4 +80,25 @@ func Configure() Config {
 	}
 
 	return apiconf
+}
+
+// merge filters
+func mergefilters(cli string, yaml map[string]interface{}) map[string]string {
+	ret := make(map[string]string)
+
+	// set the filters from the config file
+	for fk, fv := range yaml {
+		ret[fmt.Sprintf("%s", fk)] = fmt.Sprintf("%s", fv)
+	}
+
+	// update/add filters from cli
+	if cli > "" {
+		entries := strings.Split(cli, ",")
+		for _, e := range entries {
+			parts := strings.Split(e, "=")
+			ret[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+		}
+	}
+
+	return ret
 }
