@@ -11,8 +11,8 @@ filter:
 
 control:
   startpage: 1
-  recordsperpage: 1000
-  pagelimit: 0
+  recordsperpage: 1
+  pagelimit: 1
   outputpath: "./var/"
 
 

@@ -13,8 +13,7 @@ type Config struct {
 	Email      string
 	Token      string
 	Report     string
-	FromTime   string
-	ToTime     string
+	Filters    map[string]interface{}
 	Page       int
 	PerPage    int
 	Limit      int
@@ -55,13 +54,9 @@ func Configure() Config {
 		fmt.Println("filters:" + flags.Filters)
 		s := strings.Split(flags.Filters, ",")
 		fmt.Println(s)
-
-		// use YAML fo now
-		apiconf.FromTime = cfg.Filter.FromTime
-		apiconf.ToTime = cfg.Filter.ToTime
+		// apiconf.Filters = flags.Filters
 	} else {
-		apiconf.FromTime = cfg.Filter.FromTime
-		apiconf.ToTime = cfg.Filter.ToTime
+		apiconf.Filters = cfg.Filters
 	}
 
 	if flags.Page > 0 {

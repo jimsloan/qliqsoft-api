@@ -13,10 +13,7 @@ type Yamlconfig struct {
 		BaseURL  string `yaml:"baseurl"`
 		Endpoint string `yaml:"endpoint"`
 	} `yaml:"api"`
-	Filter struct {
-		FromTime string `yaml:"fromtime"`
-		ToTime   string `yaml:"totime"`
-	}
+	Filters map[string]interface{} `yaml:"filters"`
 	Control struct {
 		Page       int    `yaml:"startpage"`
 		PerPage    int    `yaml:"recordsperpage"`
