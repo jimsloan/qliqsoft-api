@@ -15,7 +15,7 @@ func API(runtime configuration.Config) []byte {
 
 	// create the http client
 	client := http.Client{
-		Timeout: time.Second * 30, // Timeout after 2 seconds
+		Timeout: time.Second * time.Duration(runtime.ClientTimeout), // Timeout after 2 seconds
 	}
 
 	// init the request

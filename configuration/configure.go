@@ -9,15 +9,16 @@ import (
 
 // Config struct ...
 type Config struct {
-	Baseurl    string
-	Email      string
-	Token      string
-	Report     string
-	Filters    map[string]string
-	Page       int
-	PerPage    int
-	Limit      int
-	Outputpath string
+	Baseurl       string
+	Email         string
+	Token         string
+	Report        string
+	Filters       map[string]string
+	Page          int
+	PerPage       int
+	Limit         int
+	Outputpath    string
+	ClientTimeout int
 }
 
 // Configure ...
@@ -77,6 +78,13 @@ func Configure() Config {
 		apiconf.Outputpath = flags.Outputpath
 	} else {
 		apiconf.Outputpath = cfg.Control.Outputpath
+	}
+
+	if flags.ClientTimeout > 0 {
+		fmt.Println("timeout:" + strconv.Itoa(flags.ClientTimeout))
+		apiconf.ClientTimeout = flags.ClientTimeout
+	} else {
+		apiconf.ClientTimeout = 30 // default to 30 seconds
 	}
 
 	return apiconf

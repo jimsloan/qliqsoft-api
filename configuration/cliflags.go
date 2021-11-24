@@ -9,13 +9,14 @@ import (
 
 // Cliflags struct ...
 type Cliflags struct {
-	ConfigPath string
-	Outputpath string
-	Report     string
-	Filters    string
-	Page       int
-	PerPage    int
-	Limit      int
+	ConfigPath    string
+	Outputpath    string
+	Report        string
+	Filters       string
+	Page          int
+	PerPage       int
+	Limit         int
+	ClientTimeout int
 }
 
 // ParseFlags will create and parse the CLI flags
@@ -44,6 +45,9 @@ func ParseFlags() Cliflags {
 
 	// CLI flag called "-limit"
 	flag.IntVar(&flags.Limit, "limit", 0, "1 or more to limit the number of pages requested")
+
+	// CLI flag called "-limit"
+	flag.IntVar(&flags.ClientTimeout, "timeout", 0, "1 or more to set the client timeout, 30 seconds is the default")
 
 	// Actually parse the flags
 	flag.Parse()

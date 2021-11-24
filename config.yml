@@ -3,11 +3,11 @@ api:
   baseurl: https://webprod.qliqsoft.com/quincy_api/v1/reports/
 
   # patients, agents, widgets, conversations, invitation_history, terms_and_conditions, opt_outs, forms, device_tests, virtual_visits
-  endpoint: virtual_visits
+  endpoint: device_tests
 
 filters:
-  from_time: 2021-03-01T00:00:00-06:00
-  to_time: 2021-03-02T00:00:00-06:00
+  created_at_from_date: 2021-11-24T00:00:00-05:00
+  created_at_to_date: 2021-11-24T10:00:00-05:00
 
 control:
   startpage: 1
